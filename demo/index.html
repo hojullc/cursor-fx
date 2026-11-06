@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cursor-fx demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+     background:#0f172a;color:#e2e8f0;min-height:100vh;cursor:none}
+header{padding:80px 48px 48px;max-width:900px}
+h1{font-size:3rem;font-weight:900;background:linear-gradient(135deg,#7064ff,#ff6b9d,#06b6d4);
+   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.sub{color:#64748b;font-size:1.1rem;max-width:520px}
+section{padding:48px;border-top:1px solid rgba(255,255,255,.07)}
+h2{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#7064ff;font-weight:700;margin-bottom:24px}
+.demo-row{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+.card{background:#1e293b;border-radius:16px;padding:32px 40px;flex:1;min-width:200px;
+      border:1px solid rgba(255,255,255,.06)}
+/* Buttons */
+.btn{display:inline-block;padding:14px 32px;border-radius:12px;font-weight:700;font-size:1rem;
+     border:none;cursor:none;transition:all .2s;text-align:center}
+.btn-primary{background:#7064ff;color:#fff}
+.btn-outline{background:transparent;color:#7064ff;border:2px solid #7064ff}
+.btn-neon{background:transparent;color:#0ff;border:2px solid #0ff;
+          box-shadow:0 0 12px rgba(0,255,255,.3)}
+/* Spotlight section */
+.spotlight-box{background:#1e293b;border-radius:20px;overflow:hidden;padding:60px 40px;
+               text-align:center;border:1px solid rgba(255,255,255,.06)}
+.spotlight-box h3{font-size:1.8rem;font-weight:800;margin-bottom:12px}
+.spotlight-box p{color:#64748b}
+/* Grid for magnetic */
+.magnet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.magnet-item{background:#1e293b;border-radius:14px;padding:28px;text-align:center;
+             border:1px solid rgba(255,255,255,.06);cursor:none}
+.magnet-item .icon{font-size:2rem;margin-bottom:8px}
+.magnet-item p{color:#94a3b8;font-size:.85rem}
+/* Code block */
+pre{background:#1e293b;padding:24px;border-radius:12px;font-size:.8rem;
+    overflow-x:auto;white-space:pre-wrap;color:#94a3b8;margin-top:28px;
+    border:1px solid rgba(255,255,255,.06)}
+/* Mode switcher */
+.modes{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px}
+.mode-btn{padding:8px 20px;border-radius:20px;border:1px solid rgba(112,100,255,.4);
+          background:transparent;color:#94a3b8;cursor:none;font-size:.85rem;font-weight:600;
+          transition:all .2s}
+.mode-btn.active,.mode-btn:hover{background:#7064ff;color:#fff;border-color:#7064ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>cursor-fx</h1>
+  <p class="sub">Experimental cursor effects — trail, magnetic, spotlight, blob. Zero dependencies.</p>
+</header>
+
+<section>
+  <h2>Active mode</h2>
+  <div class="modes">
+    <button class="mode-btn active" onclick="setMode('cursor')">Default</button>
+    <button class="mode-btn" onclick="setMode('trail')">Trail</button>
+    <button class="mode-btn" onclick="setMode('blob')">Blob</button>
+  </div>
+</section>
+
+<section>
+  <h2>1. Magnetic Buttons</h2>
+  <div class="demo-row">
+    <button class="btn btn-primary" data-magnetic data-cfx-label="Click me">Get started</button>
+    <button class="btn btn-outline" data-magnetic data-cfx-label="Learn more">Documentation</button>
+    <button class="btn btn-neon" data-magnetic data-cfx-label="✨ Wow">Neon button</button>
+  </div>
+</section>
+
+<section>
+  <h2>2. Spotlight hover</h2>
+  <div class="spotlight-box" id="spotlight-box">
+    <h3>Move your cursor around</h3>
+    <p>The spotlight follows your mouse, revealing the content beneath the dark overlay.</p>
+  </div>
+</section>
+
+<section>
+  <h2>3. Magnetic cards</h2>
+  <div class="magnet-grid">
+    <div class="magnet-item" data-magnetic data-cfx-label="Design">
+      <div class="icon">🎨</div><p>Design Systems</p>
+    </div>
+    <div class="magnet-item" data-magnetic data-cfx-label="Code">
+      <div class="icon">⚡</div><p>Performance</p>
+    </div>
+    <div class="magnet-item" data-magnetic data-cfx-label="Ship">
+      <div class="icon">🚀</div><p>Zero deps</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Quick start</h2>
+<pre>// Default custom cursor
+CursorFx.createCursor({ size: 20, color: 'rgba(112,100,255,.85)' });
+
+// Particle trail
+CursorFx.trail({ count: 12, color: '#7064ff' });
+
+// Morphing blob cursor
+CursorFx.blob({ size: 48, morph: true });
+
+// Magnetic elements
+CursorFx.magnetic('[data-magnetic]', { strength: 0.35 });
+
+// Spotlight on a container
+CursorFx.spotlight('#hero', { radius: 220, dark: true });
+
+// Hover label (data-cfx-label="text")
+CursorFx.label();</pre>
+</section>
+
+<script src="../src/cursor-fx.js"></script>
+<script>
+let currentMode = null;
+
+function cleanup() {
+  if (currentMode) { currentMode.destroy(); currentMode = null; }
+  if (window._magnet) { window._magnet.destroy(); window._magnet = null; }
+  if (window._spotlight) { window._spotlight.destroy(); window._spotlight = null; }
+  if (window._label) { window._label.destroy(); window._label = null; }
+  document.body.style.cursor = '';
+}
+
+function setMode(mode) {
+  cleanup();
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  switch(mode) {
+    case 'cursor':
+      currentMode = CursorFx.createCursor({ size: 20, color: 'rgba(112,100,255,0.9)' });
+      break;
+    case 'trail':
+      currentMode = CursorFx.trail({ count: 14, size: 10, color: '#7064ff' });
+      break;
+    case 'blob':
+      currentMode = CursorFx.blob({ size: 56, color: 'rgba(112,100,255,0.65)', morph: true });
+      break;
+  }
+
+  window._magnet = CursorFx.magnetic('[data-magnetic]', { strength: 0.4 });
+  window._spotlight = CursorFx.spotlight('#spotlight-box', { radius: 200, dark: true });
+  window._label = CursorFx.label();
+}
+
+setMode('cursor');
+</script>
+</body>
+</html>
